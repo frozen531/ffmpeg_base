@@ -49,7 +49,7 @@ char *ffmpeg::protocol_info()
     while ((*p_temp) != nullptr){
         sprintf(info, "%s[In ][%10s]\n", info, avio_enum_protocols((void **)p_temp, 0));
     }
-    pup = NULL;
+    pup = nullptr;
     //Output
     avio_enum_protocols((void **)p_temp, 1);
     while ((*p_temp) != nullptr){
@@ -64,7 +64,7 @@ char *ffmpeg::avformat_info()
     memset(info,0,40000);
     sprintf(info, "%s\n", "<<AVFormat>>");
 
-    av_register_all();
+    //av_register_all();
 
     AVInputFormat *if_temp = av_iformat_next(nullptr);
     AVOutputFormat *of_temp = av_oformat_next(nullptr);
@@ -86,7 +86,7 @@ char *ffmpeg::avcodec_info()
     memset(info,0,40000);
     sprintf(info, "%s\n", "<<AVCodec>>");
 
-    av_register_all();
+    //av_register_all();
 
     AVCodec *c_temp = av_codec_next(nullptr);
 
@@ -121,7 +121,7 @@ char *ffmpeg::avfilter_info()
     memset(info,0,40000);
     sprintf(info, "%s\n", "<<AVFilter>>");
 
-    avfilter_register_all();
+    //avfilter_register_all(); // 同av_register_all可被移除或替换
 
     AVFilter *f_temp = (AVFilter *)avfilter_next(nullptr);
 
@@ -137,7 +137,8 @@ char *ffmpeg::ffmpeg_configure()
     memset(info,0,40000);
     sprintf(info, "%s\n", "<<Configuration>>");
 
-    av_register_all();
+    // 新版本使用全局数组muxer_list[]等替换链表first_oformat等完成解复用器等的注册
+    //av_register_all();
 
     sprintf(info, "%s %s\n", info, avcodec_configuration());
 
