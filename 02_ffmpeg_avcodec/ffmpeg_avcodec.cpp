@@ -205,6 +205,18 @@ void ffmpeg_avcodec::test_avcodec_perser()
 
             index++;
 
+            if(1 == index)
+            {
+                std::ofstream test;
+                test.open("test", std::ios::out | std::ios::binary);
+                if(!test)
+                {
+                    std::cout << "out file test open failed!" << std::endl;
+                    return;
+                }
+                test.write((char*)pPacket->data, pPacket->size);
+            }
+
             // textEdit
             CompressedFrameData m(frame_seek_file, pPacket->size);
             m_frame_info.push_back(m);
@@ -218,11 +230,11 @@ void ffmpeg_avcodec::test_avcodec_perser()
                 if(0 == ret)
                 {
                     for(int row = 0; row < pFrame->height; ++row)
-                        m_outfile.write((char*)(pFrame->data[1] + pFrame->linesize[0] * row), pFrame->width);
-//                    for(int row = 0; row < pFrame->height / 2; ++row)
-//                        m_outfile.write((char*)(pFrame->data[1] + pFrame->linesize[1] * row), pFrame->width / 2);
-//                    for(int row = 0; row < pFrame->height / 2; ++row)
-//                        m_outfile.write((char*)(pFrame->data[2] + pFrame->linesize[2] * row), pFrame->width / 2);
+                        m_outfile.write((char*)(pFrame->data[0] + pFrame->linesize[0] * row), pFrame->width);
+                    for(int row = 0; row < pFrame->height / 2; ++row)
+                        m_outfile.write((char*)(pFrame->data[1] + pFrame->linesize[1] * row), pFrame->width / 2);
+                    for(int row = 0; row < pFrame->height / 2; ++row)
+                        m_outfile.write((char*)(pFrame->data[2] + pFrame->linesize[2] * row), pFrame->width / 2);
 
                 }
             }
@@ -317,15 +329,29 @@ void ffmpeg_avcodec::on_tableView_clicked(const QModelIndex &index)
 
     // 打开文件
     QFile file1(m_infile_name);
+    QDataStream in(&file1);
     file1.open(QIODevice::ReadOnly);
     file1.seek(tmp.start);
     std::cout << "start pos: " << file1.pos() << std::endl;
 
+    std::ofstream test;
+    test.open("test2", std::ios::out | std::ios::binary);
+    if(!test)
+    {
+        std::cout << "out file test open failed!" << std::endl;
+        return;
+    }
+
+
+    // 从指定位置读取并显示
     QByteArray ba;
     char byte;
     int cnt = 0;
-    while(cnt < tmp.length && file1.getChar(&byte))
+    while(cnt < tmp.length && in.readRawData(&byte, 1))
     {
+        test.write((char*)&byte, 1);
+        std::cout << "byte:" << byte << std::endl;
+
         ba += QString("%1").arg(byte, 2, 16, QLatin1Char('0')).toUpper();   // 将byte以十六进制大写显示，2位，高位0填充
         ba += "  ";
 
@@ -338,4 +364,5 @@ void ffmpeg_avcodec::on_tableView_clicked(const QModelIndex &index)
     setTextCursorToTop();   // 填充完数据后调用才能生效
 
     file1.close();
+    test.close();
 }
