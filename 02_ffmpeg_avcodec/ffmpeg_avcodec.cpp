@@ -142,7 +142,7 @@ void ffmpeg_avcodec::test_avcodec_perser()
         std::cout << "in file:" << p_in_file<< " open failed!" << std::endl;
         return;
     }
-    m_outfile.open("out", std::ios::out | std::ios::binary);
+    m_outfile.open(m_outfile_name.toLatin1().data(), std::ios::out | std::ios::binary);
     if(!m_outfile)
     {
         std::cout << "out file:" << p_in_file<< " open failed!" << std::endl;
@@ -334,35 +334,29 @@ void ffmpeg_avcodec::on_tableView_clicked(const QModelIndex &index)
     file1.seek(tmp.start);
     std::cout << "start pos: " << file1.pos() << std::endl;
 
-    std::ofstream test;
-    test.open("test2", std::ios::out | std::ios::binary);
-    if(!test)
-    {
-        std::cout << "out file test open failed!" << std::endl;
-        return;
-    }
-
-
     // 从指定位置读取并显示
     QByteArray ba;
-    char byte;
     int cnt = 0;
-    while(cnt < tmp.length && in.readRawData(&byte, 1))
-    {
-        test.write((char*)&byte, 1);
-        std::cout << "byte:" << byte << std::endl;
 
+    int byte;
+    while(cnt < tmp.length && file1.read((char*)&byte, 1))  // 使用char byte;会有某些数出现FFFFFFFF+byte这种，换成int后就没有了，原因不明
+    {
         ba += QString("%1").arg(byte, 2, 16, QLatin1Char('0')).toUpper();   // 将byte以十六进制大写显示，2位，高位0填充
         ba += "  ";
-
-        std::cout << file1.pos() << std::endl;
-        std::cout << "cnt: " << cnt ++ << std::endl;
-
+        cnt++;
     }
 
     ui->textEdit->append(ba);
     setTextCursorToTop();   // 填充完数据后调用才能生效
 
     file1.close();
-    test.close();
+}
+
+void ffmpeg_avcodec::on_pushButton_out_clicked()
+{
+    QString curPath = QCoreApplication::applicationDirPath();   //本路径不可修改
+    QString dlgTitle = "保存文件为";
+    QString filter = "所有格式(*.*)";
+    m_outfile_name = QFileDialog::getSaveFileName(this, dlgTitle, curPath, filter); // 这里注意输入文件名时要自己加后缀，否则会按照filter默认加，当默认为所有格式时，不加后缀会报错
+    ui->lineEdit_out->setText(m_outfile_name);
 }

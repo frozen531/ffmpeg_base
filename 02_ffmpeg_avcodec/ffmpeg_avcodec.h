@@ -69,6 +69,12 @@ private slots:
      */
     void on_tableView_clicked(const QModelIndex &index);
 
+    /**
+     * @brief on_pushButton_out_clicked
+     * @attention 选择输出文件名
+     */
+    void on_pushButton_out_clicked();
+
 private:
     Ui::ffmpeg_avcodec *ui;
 
@@ -113,6 +119,7 @@ private:
 
     // 文件相关
     QString                 m_infile_name;
+    QString                 m_outfile_name;
     std::ifstream           m_infile;
     std::ofstream           m_outfile;
 
