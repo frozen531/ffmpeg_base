@@ -205,18 +205,6 @@ void ffmpeg_avcodec::test_avcodec_perser()
 
             index++;
 
-            if(1 == index)
-            {
-                std::ofstream test;
-                test.open("test", std::ios::out | std::ios::binary);
-                if(!test)
-                {
-                    std::cout << "out file test open failed!" << std::endl;
-                    return;
-                }
-                test.write((char*)pPacket->data, pPacket->size);
-            }
-
             // textEdit
             CompressedFrameData m(frame_seek_file, pPacket->size);
             m_frame_info.push_back(m);
@@ -262,6 +250,14 @@ void ffmpeg_avcodec::on_pbt_parse_clicked()
     {
         QMessageBox msgBox;
         msgBox.setText(tr("请先选择带解码文件！"));
+        msgBox.exec();
+        return;
+    }
+
+    if("" == m_outfile_name)
+    {
+        QMessageBox msgBox;
+        msgBox.setText(tr("请先确定待保存文件名！"));
         msgBox.exec();
         return;
     }
@@ -324,8 +320,8 @@ void ffmpeg_avcodec::on_tableView_clicked(const QModelIndex &index)
 
     ui->textEdit->clear();
     ui->textEdit->setLineWrapMode(QTextEdit::FixedColumnWidth); // 搭配setLineWrapColumnOrWidth使用
-    ui->textEdit->setLineWrapColumnOrWidth((16 + 15) * 2);
-    ui->textEdit->setFontPointSize(12); // 需要放置在setText之前，否则不生效
+    ui->textEdit->setLineWrapColumnOrWidth((16 + 15) * 2);      // 按照十六进制一行（16个数+中间"  "间隔）* 2
+    //ui->textEdit->setFontPointSize(12); // 需要放置在setText之前，否则不生效
 
     // 打开文件
     QFile file1(m_infile_name);
@@ -340,7 +336,7 @@ void ffmpeg_avcodec::on_tableView_clicked(const QModelIndex &index)
 
     int byte;
     while(cnt < tmp.length && file1.read((char*)&byte, 1))  // 使用char byte;会有某些数出现FFFFFFFF+byte这种，换成int后就没有了，原因不明
-    {
+    {     
         ba += QString("%1").arg(byte, 2, 16, QLatin1Char('0')).toUpper();   // 将byte以十六进制大写显示，2位，高位0填充
         ba += "  ";
         cnt++;
