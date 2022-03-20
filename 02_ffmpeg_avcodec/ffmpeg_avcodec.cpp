@@ -150,6 +150,7 @@ void ffmpeg_avcodec::test_avcodec_perser()
     }
 
     // 帧数据
+    int ret = 0;
     int index = 0;
     AVPacket *pPacket;    // 压缩的数据
     pPacket = av_packet_alloc(); // 可以代替以前版本的av_init_packet()
@@ -181,7 +182,9 @@ void ffmpeg_avcodec::test_avcodec_perser()
             real_read_size -= len;
 
             if(0 == pPacket->size)   // 如果该值为0，表示为不完整帧，需要继续解析
+            {
                 continue;
+            }
 
             QString picture_type;
             switch(m_avcodec_ParsetContext->pict_type){
@@ -211,7 +214,7 @@ void ffmpeg_avcodec::test_avcodec_perser()
             frame_seek_file += pPacket->size;
 
             // 解码
-            int ret = avcodec_send_packet(m_avcodec_Context, pPacket);  // 送入一帧进行解码
+            ret = avcodec_send_packet(m_avcodec_Context, pPacket);  // 送入一帧进行解码
             if(0 == ret)
             {
                 ret = avcodec_receive_frame(m_avcodec_Context, pFrame); // 获取一帧解码数据
@@ -229,8 +232,33 @@ void ffmpeg_avcodec::test_avcodec_perser()
         }
     }
 
+    std::cout << "stride[0] = " << pFrame->linesize[0] << ", width[0] = " << pFrame->height << std::endl;
+    std::cout << "stride[1] = " << pFrame->linesize[0] << ", width[1] = " << pFrame->height << std::endl;
+    std::cout << "stride[2] = " << pFrame->linesize[0] << ", width[2] = " << pFrame->height << std::endl;
+
+    // 将部分未解码帧解码输出
+    ret = avcodec_send_packet(m_avcodec_Context, nullptr);
+    while (ret >= 0)
+    {
+        ret = avcodec_receive_frame(m_avcodec_Context, pFrame);
+        if(0 == ret)
+        {
+            for(int row = 0; row < pFrame->height; ++row)
+                m_outfile.write((char*)(pFrame->data[0] + pFrame->linesize[0] * row), pFrame->width);
+            for(int row = 0; row < pFrame->height / 2; ++row)
+                m_outfile.write((char*)(pFrame->data[1] + pFrame->linesize[1] * row), pFrame->width / 2);
+            for(int row = 0; row < pFrame->height / 2; ++row)
+                m_outfile.write((char*)(pFrame->data[2] + pFrame->linesize[2] * row), pFrame->width / 2);
+        }
+    }
+
     m_infile.close();
     m_outfile.close();
+
+    av_parser_close(m_avcodec_ParsetContext);
+    avcodec_free_context(&m_avcodec_Context);
+    av_frame_free(&pFrame);
+    av_packet_free(&pPacket);
 
     std::cout << "ok" << std::endl;
 }
