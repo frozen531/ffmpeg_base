@@ -24,12 +24,12 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 CONFIG += c++11
 
-INCLUDEPATH += $$PWD/ffmpeg_4_4_1/include
+INCLUDEPATH += $$PWD/../00_ffmpeg_4_4_1/include
 
-LIBS += -L$$PWD/"ffmpeg_4_4_1/lib" -lavcodec \
-        -L$$PWD/"ffmpeg_4_4_1/lib" -lavfilter \
-        -L$$PWD/"ffmpeg_4_4_1/lib" -lavformat \
-        -L$$PWD/"ffmpeg_4_4_1/lib" -lpostproc \
+LIBS += -L$$PWD/../00_ffmpeg_4_4_1/lib -lavcodec \
+        -L$$PWD/../00_ffmpeg_4_4_1/lib -lavfilter \
+        -L$$PWD/../00_ffmpeg_4_4_1/lib -lavformat \
+        -L$$PWD/../00_ffmpeg_4_4_1/lib -lpostproc \
 #        -L$$PWD/"ffmpeg_4_4_1/lib" -lavdevice \
 #        -L$$PWD/"ffmpeg_4_4_1/lib" -lavutil \
 #        -L$$PWD/"ffmpeg_4_4_1/lib" -lswresample \

@@ -34,10 +34,9 @@ HEADERS += \
 FORMS += \
         ffmpeg_avcodec.ui
 
-INCLUDEPATH += $$PWD/ffmpeg_4_4_1/include
+INCLUDEPATH += $$PWD/../00_ffmpeg_4_4_1/include
 
-LIBS += -L$$PWD/"ffmpeg_4_4_1/lib" -lavcodec \
-        -L$$PWD/"ffmpeg_4_4_1/lib" -lavutil \
+LIBS += -L$$PWD/../00_ffmpeg_4_4_1/lib -lavcodec -lavutil
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
